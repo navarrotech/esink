@@ -1,0 +1,52 @@
+version: 2.1
+
+executors:
+  primary:
+    docker:
+      - image: cimg/node:19.7.0
+    working_directory: ~/app
+
+jobs:
+  api:
+    executor: primary
+
+    steps:
+      - checkout
+
+      - restore_cache: 
+          keys: 
+            - api-dependencies-{{ checksum "yarn.lock" }}
+
+      - run:
+          name: Install API
+          command: yarn install
+
+      - run: 
+          name: Version API
+          command: |
+            VERSION=$(git rev-parse --short HEAD)
+            echo "export const version = '$VERSION';" > ./src/version.ts
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: api-dependencies-{{ checksum "yarn.lock" }}
+
+      - setup_remote_docker:
+          docker_layer_caching: true
+
+      - run:
+          name: Push image to Docker.io Hub
+          command: |
+            VERSION=$(git rev-parse --short HEAD)
+            docker build . -t "navarrocity/esink-service:latest"  -f ./Dockerfile
+            docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+            docker push navarrocity/esink-service:latest
+
+workflows:
+  build-deploy:
+    jobs:
+      - api:
+          filters:
+            branches:
+              only: main
