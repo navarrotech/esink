@@ -9,6 +9,11 @@ const shape = {
         .object()
         .typeError("body.data attribute must be an object")
         .required("body.data attribute is required"),
+    table: yup
+        .string()
+        .max(64, "body.table attribute must be less than 64 characters")
+        .typeError("body.table attribute must be a string")
+        .required("body.table attribute is required"),
     type: yup
         .string()
         .max(64, "body.type attribute must be less than 64 characters")

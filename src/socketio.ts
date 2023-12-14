@@ -21,7 +21,10 @@ const connectedUsers: Record<string, Connection[]> = {}
 // Do not emit anything outside of this function
 export function publish(userId: string, payload: SocketPayload){
     const id = uuid();
-    const connections = connectedUsers[userId];
+    const connections = userId === '*'
+        ? Object.values(connectedUsers).flat()
+        : connectedUsers[userId]
+
     if(!connections){
         console.log(`No connections found for user ${userId}, skipping publish event...`);
         return;
@@ -105,7 +108,11 @@ export function initSocketio(io: Server){
             socket.on('event', (payload: SocketPayload) => {
                 try {
                     SocketPayloadValidator.validateSync(payload);
-                    publish(user.id, payload);
+                    publish(user.id, {
+                        ...payload,
+                        source: 'socketio',
+                        source_type: 'socketio'
+                    });
                 } catch (error: any) {
                     socket.emit('error', {
                         code: 400,

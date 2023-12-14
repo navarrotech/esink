@@ -33,6 +33,7 @@ function handler(req: Request, response: Response){
         version,
         timestamp,
         userId,
+        table,
         securityToken,
     } = req.body as Body;
 
@@ -54,6 +55,8 @@ function handler(req: Request, response: Response){
                 source,
                 version,
                 timestamp,
+                source_type: 'api',
+                table
             }
         );
 

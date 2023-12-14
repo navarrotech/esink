@@ -13,13 +13,15 @@ type Environment = {
     MYSQL_HOST: string
     MYSQL_TABLE_TARGET: string
     MYSQL_PORT: string
+    TABLE_NAMES: string,
+    TABLE_AUTH_COLUMN_ROUTING: string,
 }
 
 const {
     PORT=80,
     NODE_ENV='development',
     USE_SSL=false,
-    DEFAULT_SOURCE="Unknown",
+    DEFAULT_SOURCE="API",
     ALLOW_REPUBLISHING=false,
     SECURITY_TOKEN=null,
     POSTGRES_DATABASE_URL,
@@ -28,6 +30,8 @@ const {
     MYSQL_DATABASE,
     MYSQL_HOST,
     MYSQL_TABLE_TARGET="pub_events",
+    TABLE_NAMES="",
+    TABLE_AUTH_COLUMN_ROUTING="{}",
     MYSQL_PORT,
 } = process.env as unknown as Environment;
 
@@ -45,4 +49,6 @@ export {
     MYSQL_HOST,
     MYSQL_TABLE_TARGET,
     MYSQL_PORT,
+    TABLE_NAMES,
+    TABLE_AUTH_COLUMN_ROUTING,
 }

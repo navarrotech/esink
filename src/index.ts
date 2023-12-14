@@ -12,7 +12,7 @@ import { Server as SocketioServer } from "socket.io";
 // Handlers
 import routes from './routes'
 import { initSocketio } from './socketio'
-import { initDatabase } from "./database";
+import { initDatabase, teardown } from "./database";
 import { version } from "./version";
 
 // Environment Variables
@@ -42,12 +42,14 @@ app.use(
 )
 
 // Node.js error reporting
-app.on('error', (error: any) => {
+app.on('error', async (error: any) => {
     console.log(colors.red("[ERROR]") + ':', error)
+    await teardown();
     process.exit(1)
 });
 process.on('uncaughtException', async function (error: any) {
   console.log(colors.red("[ERROR]") + ':', error)
+  await teardown();
   process.exit(1)
 });
 
@@ -93,6 +95,29 @@ app.all('*', (request: any, response: any) =>
     })
 );
 
+// Graceful shutdown
+const gracefulShutdown = async () => {
+    await teardown();
+
+    console.log(colors.yellow("[SHUTTING DOWN]") + ": Gracefully shutting down the server...");
+
+    // Perform any necessary cleanup or finalization tasks here
+
+    server.close((error: any) => {
+        if (error) {
+            console.error(colors.red("[ERROR]") + ": Error occurred while shutting down the server:", error);
+            process.exit(1);
+        }
+
+        console.log(colors.green("[SHUTDOWN COMPLETE]") + ": Server has been gracefully shut down");
+        process.exit(0);
+    });
+};
+
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);
+
+// Startup
 Promise.all([
   initDatabase(),
 ]).then(() => {

@@ -12,8 +12,10 @@ export type Route = {
 
 // Socket.io payloads & types:
 export type SocketPayload = {
+    table: string,
     timestamp: number
     source: string
+    source_type?: 'database' | 'api' | 'socketio'
     version: number
     type: string
     data: any
