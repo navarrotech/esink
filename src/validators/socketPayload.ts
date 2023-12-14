@@ -11,6 +11,7 @@ const shape = {
         .required("body.data attribute is required"),
     type: yup
         .string()
+        .max(64, "body.type attribute must be less than 64 characters")
         .typeError("body.type attribute must be a string")
         .required("body.type attribute is required"),
     source: yup

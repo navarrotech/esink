@@ -31,8 +31,13 @@ export function publish(userId: string, payload: SocketPayload){
         id,
     }
     connections.forEach(connection => {
-        connection.socket.emit(payload.type, payloadWithId);
-        console.log(`Publishing payload`, payloadWithId);
+        try {
+            connection.socket.emit(payload.type, payloadWithId);
+            connection.socket.emit('changes', payloadWithId);
+        } catch (error) {
+            console.log(`Failed to publish payload to user ${userId} on connection ${connection.id}`, error);
+        }
+        console.log(`Published payload`, payloadWithId);
     });
 }
 
