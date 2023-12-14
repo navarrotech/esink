@@ -6,7 +6,6 @@ type Environment = {
     DEFAULT_SOURCE: string
     ALLOW_REPUBLISHING: boolean
     SECURITY_TOKEN: string | null
-
     POSTGRES_DATABASE_URL: string
     MYSQL_USERNAME: string
     MYSQL_PASSWORD: string
