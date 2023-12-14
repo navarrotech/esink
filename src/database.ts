@@ -141,11 +141,15 @@ export async function initMysql(){
             database: MYSQL_DATABASE,
         });
         
-        await connection.connect();
+        try {
+            await connection.connect();
+        } catch (error: any){
+            console.log(error);
+            return;
+        }
 
         connection.on('error', (error) => {
             console.log(colors.red("[DB ERROR]") + ':', error)
-            process.exit(1)
         });
 
         function queryAsync(query: string): Promise<any[]>{
