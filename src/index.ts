@@ -27,13 +27,14 @@ const app = express();
 const devServer = http.createServer(app);
 const sslServer = https.createServer(app);
 
-const server = USE_SSL === false
+const server = USE_SSL !== false
     ? sslServer
     : devServer;
 
 const socketio = new SocketioServer(server);
 
 // Middleware:
+app.enable('trust proxy')
 app.use(
     helmet({
         contentSecurityPolicy: false

@@ -1,6 +1,6 @@
 
 type Environment = {
-    PORT: number
+    PORT: string
     NODE_ENV: string
     USE_SSL: boolean
     DEFAULT_SOURCE: string
@@ -12,7 +12,7 @@ type Environment = {
     MYSQL_DATABASE: string
     MYSQL_HOST: string
     MYSQL_TABLE_TARGET: string
-    MYSQL_PORT: number
+    MYSQL_PORT: string
 }
 
 const {
