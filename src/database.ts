@@ -49,7 +49,6 @@ function publishWithAuthCheck(authRouting: string | string[], payload: SocketPay
     }
 }
 
-// TODO: needs implemented
 export async function initPostgres(){
     const connection = new pg.Client({});
     await connection.connect();
@@ -203,7 +202,7 @@ export async function initMysql(){
 
         cleanup = async () => {
             await queryAsync(`DROP TABLE IF EXISTS \`${MYSQL_TABLE_TARGET}\`;`)
-            await connection.destroy();
+            await connection.end();
         }
 
         // Grab all column names

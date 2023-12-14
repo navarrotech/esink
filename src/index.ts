@@ -6,6 +6,7 @@ import express from "express";
 import helmet from "helmet";
 import http from "http";
 import https from "https";
+import cors from "cors";
 import colors from 'colors/safe'
 import { Server as SocketioServer } from "socket.io";
 
@@ -31,14 +32,21 @@ const server = USE_SSL !== false
     ? sslServer
     : devServer;
 
-const socketio = new SocketioServer(server);
+const socketio = new SocketioServer(server, {
+    cors: {
+        origin: "http://localhost:5500",
+        methods: ["GET", "POST"]
+    }
+});
 
 // Middleware:
 app.enable('trust proxy')
 app.use(
+    cors(),
     helmet({
         contentSecurityPolicy: false
-    })
+    }),
+    express.json(),
 )
 
 // Node.js error reporting

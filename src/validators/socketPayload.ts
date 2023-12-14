@@ -21,14 +21,20 @@ const shape = {
         .required("body.type attribute is required"),
     source: yup
         .string()
+        .nullable()
+        .notRequired()
         .typeError("body.source attribute must be a string")
         .default(DEFAULT_SOURCE),
     version: yup
         .number()
+        .nullable()
+        .notRequired()
         .typeError("body.version attribute must be a number")
         .default(1),
     timestamp: yup
         .number()
+        .nullable()
+        .notRequired()
         .typeError("body.timestamp attribute must be a number")
         .default(() => Date.now()),
 }

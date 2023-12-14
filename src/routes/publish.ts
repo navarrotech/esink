@@ -61,9 +61,9 @@ function handler(req: Request, response: Response){
         );
 
         response
-            .status(204)
+            .status(200)
             .send({
-                code: 204,
+                code: 200,
                 message: "Message queued for publishing",
             });
 

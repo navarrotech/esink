@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+    
+    <head>
+        <title>Socket.io Test Webpage</title>
+
+        <meta content="utf-8" http-equiv="encoding">
+        <meta name="viewport" content="initial-scale=1">
+        <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+
+        <!-- JS -->
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        ></script>
+
+    </head>
+    <body>
+        <div id="root">
+            <p>Trigger a manually fired publish event via API</p>
+            <button id="api_trigger" class="button" type="button">
+                <span>Fire via API</span>
+            </button>
+            <p>Trigger a manually fired publish event via Socket.IO</p>
+            <button id="socketio_trigger" class="button" type="button">
+                <span>Fire via Socket.IO</span>
+            </button>
+        </div>
+
+        <script>
+            const root = document.getElementById('root');
+            const api_trigger = document.getElementById('api_trigger');
+            const socketio_trigger = document.getElementById('socketio_trigger');
+
+            const socket = io('http://localhost', {
+                auth: {
+                    token: 'TEST'
+                }
+            });
+
+            socket.connect();
+
+            // Will receive one connection notification upon successfully connected
+            socket.on('connected', (data) => {
+                // Your regular socket.io code
+                console.log(data)
+            });
+
+            // Will fire on 400 errors or on 401 errors
+            socket.on('error', (error) => {
+                console.error(error)
+            });
+
+            // On specific table names:
+            socket.on('users', (data) => {
+                console.log("From users table callback specifically: ", data)
+            });
+
+            // Or for everything, subscribe to "changes"
+            socket.on('changes', (data) => {
+                console.log("From all changes callback: ", data)
+            });
+
+            api_trigger.addEventListener('click', () => {
+                fetch('http://localhost/publish', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        // Required values:
+                        data: {
+                            foo: 'bazz'
+                        },
+                        type: 'insert',
+                        securityToken: "12345",
+                        userId: "-1",
+                        table: "users",
+                        
+                        // Optional values:
+                        timestamp: Date.now(),
+                        source: "socket-io-client",
+                        version: 1,
+                    })
+                })
+                .catch(console.error)
+            });
+
+            socketio_trigger.addEventListener('click', () => {
+                socket.emit('event', {
+                    // Required values:
+                    data: {
+                        foo: 'bazz'
+                    },
+                    type: 'insert',
+                    securityToken: "12345",
+                    userId: "-1",
+                    table: "users",
+                    
+                    // Optional values:
+                    timestamp: Date.now(),
+                    source: "socket-io-client",
+                    version: 1,
+                });
+            });
+
+        </script>
+    </body>
+</html>

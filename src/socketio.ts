@@ -3,7 +3,7 @@ import type { SocketPayload } from './types'
 
 import colors from 'colors/safe'
 import { v4 as uuid } from 'uuid'
-import { validator as SocketPayloadValidator } from './validators/socketPayload';
+import { routeValidator as SocketPayloadValidator } from './validators/socketPayload';
 
 import {
     ALLOW_REPUBLISHING,
@@ -35,7 +35,7 @@ export function publish(userId: string, payload: SocketPayload){
     }
     connections.forEach(connection => {
         try {
-            connection.socket.emit(payload.type, payloadWithId);
+            connection.socket.emit(payload.table, payloadWithId);
             connection.socket.emit('changes', payloadWithId);
         } catch (error) {
             console.log(`Failed to publish payload to user ${userId} on connection ${connection.id}`, error);
@@ -69,7 +69,7 @@ export function initSocketio(io: Server){
 
         const authToken = socket.handshake.auth.token;
         const { isAuthorized, user } = await verifyAuthToken(authToken);
-        
+
         if(!isAuthorized){
             console.log(`Failed to authorize the token: ${authToken}, closing connection...`);
             socket.emit('error', {
@@ -104,7 +104,7 @@ export function initSocketio(io: Server){
         })
 
         // Allow re-publishing from the socket for testing
-        if(ALLOW_REPUBLISHING){
+        if(ALLOW_REPUBLISHING || true){
             socket.on('event', (payload: SocketPayload) => {
                 try {
                     SocketPayloadValidator.validateSync(payload);
@@ -129,6 +129,7 @@ export function initSocketio(io: Server){
         // Tell the client that the connection was successful
         socket.emit('connected', {
             sessionId,
+            userId: user.id,
             code: 200,
             message: "Successfully connected.",
         });

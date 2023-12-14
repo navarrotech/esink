@@ -97,7 +97,7 @@ See an example environment setup in the docker-compose script below.
 ```
 
 **Status response codes**:
-- 204 - Created and sent to socket.io
+- 200 - Created and sent to socket.io
 - 400 - Invalid parameters provided
 - 401 - Invalid security token
 - 403 - Security token doesn't exist in the environment variables
@@ -155,7 +155,39 @@ To run in development mode, where Node.js will watch for changes & restart your 
       - default
 ```
 
+## Socket.io Information
+In order to connect from the frontend, you'll need to use the esink domain host (no url pathname required), and you must pass along a token as a query:
+```
+const socket = io('http://localhost/', {
+  auth: {
+  	token: 'TEST'
+  }
+});
+```
+Note: Leaving token as `"TEST"` will actually work but it will return sample data, with a user id of `-1`.
 
+```
+// The "connected" topic will fire one event when you are first connected, if you are successfully connected.
+socket.on('connected', (socket) => {
+  // Your regular socket.io code
+  console.log(socket)
+});
+
+// If you're unauthorized, this error will trigger.
+// Will also trigger if you send invalid parameters while trying to self publish.
+socket.on('error', callback);
+
+// Every time an event is emitted with changes data, two topics are fired.
+// A dedicated tableName event is emitted and a generic "changes" is emitted.
+socket.on(tableName, callback);
+socket.on('changes', callback);
+
+// If you want to subscribe to only one table's changes:
+socket.on(tableName, callback);
+
+// If you want to subscribe to all changes:
+socket.on('changes', callback);
+```
 
 ## How esink works under the hood
 
