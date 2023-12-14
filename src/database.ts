@@ -179,7 +179,6 @@ export async function initMysql(){
         }
 
         cleanup = async () => {
-            await queryAsync(`DROP TABLE IF EXISTS \`${MYSQL_TABLE_TARGET}\`;`)
             await connection.end();
         }
 
