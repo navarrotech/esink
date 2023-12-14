@@ -55,11 +55,7 @@ export async function initPostgres(){
 
     // Setup triggers
     await connection.query(`
-        -- FUNCTION: public.publish_table_changes()
-
-        -- DROP FUNCTION IF EXISTS public.publish_table_changes();
-
-        CREATE OR REPLACE FUNCTION public.publish_table_changes()
+        CREATE OR REPLACE FUNCTION public.publish_changes()
             RETURNS trigger
             LANGUAGE 'plpgsql'
             COST 100
@@ -71,41 +67,23 @@ export async function initPostgres(){
                 message json;
 
                 BEGIN
-                    -- Automatic variables
-                    -- NEW
-                    --   Data type RECORD;
-                    --   variable holding the new database row for INSERT/UPDATE operations in row-level triggers.
-                    --   This variable is null in statement-level triggers and for DELETE operations.
-                    -- OLD
-                    --   Data type RECORD;
-                    --   variable holding the old database row for UPDATE/DELETE operations in row-level triggers.
-                    --   This variable is null in statement-level triggers and for INSERT operations.
-                    -- TG_OP
-                    --   Data type text;
-                    --   a string of INSERT, UPDATE, DELETE, or TRUNCATE telling for which operation the trigger was fired.
-                    -- TG_TABLE_NAME
-                    --   Data type name;
-                    --     the name of the table that caused the trigger invocation.
-
-                    -- Convert the effected table to JSON
                     IF(TG_OP = 'DELETE') THEN
                         row_data = row_to_json(OLD);
                     ELSE
                         row_data = row_to_json(NEW);
                     END IF;
 
-                    -- Create message to be published
                     message = json_build_object(
-                        'table',TG_TABLE_NAME,
+                        'data',row_data
                         'method',TG_OP,
-                        'data',row_data);
+                        'table',TG_TABLE_NAME,
+                    );
 
-                    -- Publish the message
                     PERFORM pg_notify('changes', message::text);
 
                     RETURN NULL;
                 END;
-                
+
         $BODY$;
     `)
 
@@ -119,7 +97,7 @@ export async function initPostgres(){
             AFTER INSERT OR UPDATE OR DELETE
             ON ${tableName}
             FOR EACH ROW
-            EXECUTE PROCEDURE publish_table_changes();
+            EXECUTE PROCEDURE publish_changes();
         `
     }
 
