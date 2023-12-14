@@ -42,6 +42,8 @@ jobs:
             docker build . -t "navarrocity/esink-service:latest"  -f ./Dockerfile
             docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
             docker push navarrocity/esink-service:latest
+            docker tag navarrocity/esink-services:latest "navarrocity/esink-service:${VERSION}"
+            docker push "navarrocity/esink-service:${VERSION}"
 
 workflows:
   build-deploy:
