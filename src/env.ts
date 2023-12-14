@@ -31,9 +31,11 @@ const {
     MYSQL_HOST,
     MYSQL_TABLE_TARGET="pub_events",
     TABLE_NAMES="",
-    TABLE_AUTH_COLUMN_ROUTING="{}",
+    TABLE_AUTH_COLUMN_ROUTING: TABLE_AUTH_COLUMN_ROUTER="{}",
     MYSQL_PORT,
 } = process.env as unknown as Environment;
+
+const TABLE_AUTH_COLUMN_ROUTING: Record<string, string[] | string> = JSON.parse(TABLE_AUTH_COLUMN_ROUTER);
 
 export {
     PORT,
