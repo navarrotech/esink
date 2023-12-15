@@ -32,6 +32,10 @@ jobs:
             - node_modules
           key: api-dependencies-{{ checksum "yarn.lock" }}
 
+      - run:
+          name: Validate typescript
+          command: yarn tsc ./src/index.ts --noEmit --esModuleInterop --skipLibCheck
+
       - setup_remote_docker:
           docker_layer_caching: true
 

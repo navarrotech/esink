@@ -3,10 +3,13 @@ import type { SocketPayload } from './types'
 
 import colors from 'colors/safe'
 import { v4 as uuid } from 'uuid'
+import { queryDatabaseAsync } from './database';
 import { routeValidator as SocketPayloadValidator } from './validators/socketPayload';
 
 import {
     ALLOW_REPUBLISHING,
+    AUTH_TABLE,
+    AUTH_COLUMN,
 } from './env'
 
 type Connection = {
@@ -54,14 +57,23 @@ async function verifyAuthToken(authToken: string){
             }
         };
     }
-    await new Promise(resolve => setTimeout(resolve, 1_000));
-    return {
-        isAuthorized: true,
-        user: {
-            id: "0",
-            name: "Sample User",
-        }
-    };
+
+    const authRows = await queryDatabaseAsync(
+        `SELECT * FROM ${AUTH_TABLE} WHERE ${AUTH_COLUMN} = ?`
+        , [ authToken ]
+    )
+
+    if(authRows && authRows?.length === 1){
+        return {
+            isAuthorized: true,
+            user: authRows[0],
+        };
+    } else {
+        return {
+            isAuthorized: false,
+            user: null,
+        };
+    }
 }
 
 export function initSocketio(io: Server){

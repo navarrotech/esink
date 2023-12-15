@@ -1,6 +1,8 @@
 
 // Types
 import type { SocketPayload } from './types';
+import type { Client } from 'pg';
+import type { Connection } from 'mysql';
 
 // Utility
 import colors from 'colors/safe'
@@ -28,6 +30,8 @@ import {
 const tableNames = (TABLE_NAMES).split(',').map(s => s.trim())
 
 let cleanup: () => void = async () => {};
+let MySQLClient: Connection;
+let PgClient: Client;
 
 function publishWithAuthCheck(authRouting: string | string[], payload: SocketPayload){
     // Publish to all users:
@@ -152,7 +156,7 @@ export async function initMysql(){
             console.log(colors.red("[DB ERROR]") + ':', error)
         });
 
-        function queryAsync(query: string): Promise<any[]>{
+        const queryAsync = (query: string): Promise<any[]> => {
             return new Promise((resolve, reject) => {
                 connection.query(query, (error, results) => {
                     if(error){
@@ -203,7 +207,7 @@ export async function initMysql(){
             return prev;
         }, {})
 
-        function makeTrigger(tableName: string){
+        const makeTrigger = (tableName: string) => {
             const tableNames = tableNamesByTable[tableName]
     
             return `
@@ -335,6 +339,31 @@ export async function initDatabase(){
     }
 
     console.log(colors.green("[INITIALIZED]") + ": Database");
+}
+
+export async function queryDatabaseAsync(query: string, values: any[]): Promise<any[]>{
+    if(MySQLClient){
+        return new Promise((resolve, reject) => {
+            MySQLClient.query(query, values, (error, results) => {
+                if(error){
+                    console.log(colors.red("[DB ERROR]") + ':', error)
+                    return resolve([])
+                }
+                else {
+                    // For some reason, results are a class object varying of what type of query is run
+                    // Instead, we want a plain (flat) JSON object:
+                    const data = JSON.parse(
+                        JSON.stringify(results)
+                    )
+                    resolve(data as any[])
+                }
+            })
+        }) as unknown as Promise<any[]>
+    }
+    if(PgClient){
+        return PgClient.query(query, values) as unknown as Promise<any[]>
+    }
+    return Promise.resolve([])
 }
 
 export async function teardown(){

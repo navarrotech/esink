@@ -30,6 +30,8 @@ Before running esink, you need to configure the database connection and other se
 - **MYSQL_PASSWORD**
 - **MYSQL_TABLE_TARGET** - Name of the MySQL table that triggers will dump events into, the service will poll this table x4 times per second and constantly drop/recreate it upon restarting.
 - **TABLE_NAMES** - Applies to both MySQL and PostgreSQL. A string of comma separated table names that you want to have monitored. For example "users,table_2,pushNotifications"
+- **AUTH_TABLE** - The table that your auth token lives in. 
+- **AUTH_COLUMN** - The column linked to the table in AUTH_TABLE, that your auth token lives in. Can be a JWT, session security token, etc.
 - **TABLE_AUTH_COLUMN_ROUTING** - Stringified JSON that defines auth rules. See below.
 
 **TABLE_AUTH_COLUMN_ROUTING**
