@@ -32,6 +32,7 @@ Before running esink, you need to configure the database connection and other se
 - **TABLE_NAMES** - Applies to both MySQL and PostgreSQL. A string of comma separated table names that you want to have monitored. For example "users,table_2,pushNotifications"
 - **AUTH_TABLE** - The table that your auth token lives in. 
 - **AUTH_COLUMN** - The column linked to the table in AUTH_TABLE, that your auth token lives in. Can be a JWT, session security token, etc.
+- **FILTERS** - A comma separated string of table.column values to remove before publishing to the browser. For example: "user.password,user.reset_password_token,table_name.column_name"
 - **TABLE_AUTH_COLUMN_ROUTING** - Stringified JSON that defines auth rules. See below.
 
 **TABLE_AUTH_COLUMN_ROUTING**

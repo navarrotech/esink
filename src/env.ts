@@ -15,6 +15,7 @@ type Environment = {
     MYSQL_PORT: string
     TABLE_NAMES: string,
     TABLE_AUTH_COLUMN_ROUTING: string,
+    FILTERS: string,
     AUTH_TABLE: string,
     AUTH_COLUMN: string
 }
@@ -35,6 +36,7 @@ const {
     TABLE_NAMES="",
     TABLE_AUTH_COLUMN_ROUTING: TABLE_AUTH_COLUMN_ROUTER="{}",
     MYSQL_PORT,
+    FILTERS="",
     AUTH_TABLE="auth",
     AUTH_COLUMN="token",
 } = process.env as unknown as Environment;
@@ -57,6 +59,7 @@ export {
     MYSQL_PORT,
     TABLE_NAMES,
     TABLE_AUTH_COLUMN_ROUTING,
+    FILTERS,
     AUTH_TABLE,
     AUTH_COLUMN,
 }

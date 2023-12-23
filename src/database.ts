@@ -25,10 +25,12 @@ import {
     TABLE_NAMES,
     TABLE_AUTH_COLUMN_ROUTING,
     MYSQL_TABLE_TARGET,
+    FILTERS,
 } from './env'
 
 const tableNames = (TABLE_NAMES).split(',').map(s => s.trim())
 
+let filters: Record<string, string[]>; // Record of table name, and array of column names to blacklist
 let cleanup: () => void = async () => {};
 let MySQLClient: Connection;
 let PgClient: Client;
@@ -331,6 +333,24 @@ export async function initMysql(){
 }
 
 export async function initDatabase(){
+    let rawFilterData = (FILTERS + "").trim();
+    if(rawFilterData.endsWith(',')){
+        rawFilterData = rawFilterData.slice(0, -1);
+    }
+    filters = rawFilterData.split(',').reduce((prev, next) => {
+        if(!next){
+            return prev;
+        }
+        let [ table, column ] = next.split('.');
+        table = table.trim();
+        column = column.trim();
+        if(!prev[table]){
+            prev[table] = [column];
+        } else {
+            prev[table].push(column);
+        }
+        return prev;
+    }, {})
 
     if(MYSQL_DATABASE){
         await initMysql()
@@ -339,6 +359,18 @@ export async function initDatabase(){
     }
 
     console.log(colors.green("[INITIALIZED]") + ": Database");
+}
+
+export function filterColumns<T extends object = any>(table: string, data: T): T{
+    if(!filters[table]){
+        return data;
+    }
+
+    for(const column of filters[table]){
+        delete data[column];
+    }
+
+    return data;
 }
 
 export async function queryDatabaseAsync(query: string, values: any[]): Promise<any[]>{

@@ -3,7 +3,7 @@ import type { SocketPayload } from './types'
 
 import colors from 'colors/safe'
 import { v4 as uuid } from 'uuid'
-import { queryDatabaseAsync } from './database';
+import { filterColumns, queryDatabaseAsync } from './database';
 import { routeValidator as SocketPayloadValidator } from './validators/socketPayload';
 
 import {
@@ -32,8 +32,10 @@ export function publish(userId: string, payload: SocketPayload){
         console.log(`No connections found for user ${userId}, skipping publish event...`);
         return;
     }
+
     const payloadWithId = {
         ...payload,
+        data: filterColumns(payload.table, payload.data),
         id,
     }
     connections.forEach(connection => {
