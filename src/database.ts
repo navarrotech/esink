@@ -350,7 +350,7 @@ export async function initDatabase(){
             prev[table].push(column);
         }
         return prev;
-    }, {})
+    }, {} as Record<string, string[]>)
 
     if(MYSQL_DATABASE){
         await initMysql()
@@ -367,6 +367,7 @@ export function filterColumns<T extends object = any>(table: string, data: T): T
     }
 
     for(const column of filters[table]){
+        // @ts-ignore
         delete data[column];
     }
 
