@@ -107,6 +107,10 @@ export async function initPostgres(){
         `
     }
 
+    if (!TABLE_NAMES) {
+        return;
+    }
+
     // Generate triggers:
     await Promise.all(
         tableNames.map(
@@ -265,6 +269,11 @@ export async function initMysql(){
 
         // Recreate the pubsub table:
         await queryAsync(`DROP TABLE IF EXISTS \`${MYSQL_TABLE_TARGET}\`;`)
+
+        if(!TABLE_NAMES){
+            return;
+        }
+
         await queryAsync(`
             CREATE TABLE \`${MYSQL_TABLE_TARGET}\` (
                 id INT AUTO_INCREMENT PRIMARY KEY,
