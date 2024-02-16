@@ -158,6 +158,8 @@ export async function initMysql(){
             return;
         }
 
+        MySQLClient = connection;
+
         console.log(colors.green("[ CONNECTED ]: ") + ': Connected to MySQL database');
 
         connection.on('error', (error) => {
