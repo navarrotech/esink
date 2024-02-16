@@ -65,6 +65,8 @@ async function verifyAuthToken(authToken: string){
         , [ authToken ]
     )
 
+    console.log(authRows)
+
     if(authRows && authRows?.length === 1){
         return {
             isAuthorized: true,
