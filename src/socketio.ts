@@ -110,7 +110,7 @@ export function initSocketio(io: Server){
 
         // Cleanup on disconnect
         socket.on('disconnect', () => {
-            console.log(`User ${user.name} (id: ${user.id}) disconnected, session id: ${sessionId}.`);
+            console.log(`User ${user.name || user.email || user.username} (id: ${user.id}) disconnected, session id: ${sessionId}.`);
             connectedUsers[user.id] = connectedUsers[user.id].filter(c => c.id !== sessionId);
             if(connectedUsers[user.id].length === 0){
                 delete connectedUsers[user.id];
