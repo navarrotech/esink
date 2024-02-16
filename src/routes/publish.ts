@@ -29,9 +29,9 @@ function handler(req: Request, response: Response){
     const {
         data,
         type,
-        source,
-        version,
-        timestamp,
+        source = 'api',
+        version = 1,
+        timestamp = Date.now(),
         userId,
         table,
         securityToken,
