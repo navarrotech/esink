@@ -65,8 +65,6 @@ async function verifyAuthToken(authToken: string){
         , [ authToken ]
     )
 
-    console.log(authRows)
-
     if(authRows && authRows?.length === 1){
         return {
             isAuthorized: true,
@@ -108,7 +106,7 @@ export function initSocketio(io: Server){
             connectedUsers[user.id] = [];
         }
         connectedUsers[user.id].push(connection);
-        console.log(`User ${user.name} (id: ${user.id}) connected, session id: ${sessionId}.`);
+        console.log(`User ${user.name || user.email || user.username} (id: ${user.id}) connected, session id: ${sessionId}.`);
 
         // Cleanup on disconnect
         socket.on('disconnect', () => {
