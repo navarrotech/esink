@@ -33,10 +33,11 @@
             const api_trigger = document.getElementById('api_trigger');
             const socketio_trigger = document.getElementById('socketio_trigger');
 
-            const socket = io('http://localhost', {
+            const socket = io('https://esink.snapshotplay.com/', {
                 auth: {
-                    token: 'TEST'
-                }
+                    token: '2AC08EC6-CF02-458A-8BD6-2FC451F0B8B7'
+                },
+                transports: ['websocket'],
             });
 
             socket.connect();
