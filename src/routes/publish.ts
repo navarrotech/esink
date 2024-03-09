@@ -15,7 +15,7 @@ type Body = {
 } & SocketPayload
 
 if(!SECURITY_TOKEN){
-    console.error(colors.red("[ERROR]: SECURITY_TOKEN environment variable is not set! Publishing API is disabled.\n"));
+    console.error(colors.red("[ENV]: SECURITY_TOKEN environment variable is not set! Publishing API is disabled.\n"));
 }
 
 function handler(req: Request, response: Response){

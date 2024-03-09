@@ -59,6 +59,8 @@ export async function initPostgres(){
     const connection = new pg.Client({});
     await connection.connect();
 
+    console.log("[CONNECTED] : Postgres connected.")
+
     // Setup triggers
     await connection.query(`
         CREATE OR REPLACE FUNCTION public.publish_changes()
@@ -68,27 +70,27 @@ export async function initPostgres(){
             VOLATILE NOT LEAKPROOF
         AS $BODY$
 
-                DECLARE
-                row_data json;
-                message json;
+            DECLARE
+            row_data json;
+            message json;
 
-                BEGIN
-                    IF(TG_OP = 'DELETE') THEN
-                        row_data = row_to_json(OLD);
-                    ELSE
-                        row_data = row_to_json(NEW);
-                    END IF;
+            BEGIN
+                IF(TG_OP = 'DELETE') THEN
+                    row_data = row_to_json(OLD);
+                ELSE
+                    row_data = row_to_json(NEW);
+                END IF;
 
-                    message = json_build_object(
-                        'data',row_data
-                        'method',TG_OP,
-                        'table',TG_TABLE_NAME,
-                    );
+                message = json_build_object(
+                    'data', row_data,
+                    'method', TG_OP,
+                    'table', TG_TABLE_NAME
+                );
 
-                    PERFORM pg_notify('changes', message::text);
+                PERFORM pg_notify('changes', message::text);
 
-                    RETURN NULL;
-                END;
+                RETURN NULL;
+            END;
 
         $BODY$;
     `)
@@ -108,6 +110,7 @@ export async function initPostgres(){
     }
 
     if (!TABLE_NAMES) {
+        console.log("No table names provided")
         return;
     }
 
@@ -123,8 +126,8 @@ export async function initPostgres(){
         method: 'INSERT' | 'UPDATE' | 'DELETE',
         data: any,
     }
-    const pubsub = new PGPubsub(connection);
-    pubsub.addChannel('changes', (data: ChangesPayload) => {
+    const pubsub = new PGPubsub(POSTGRES_DATABASE_URL);
+    await pubsub.addChannel('changes', (data: ChangesPayload) => {
         const authRouting: string | string[] = TABLE_AUTH_COLUMN_ROUTING[data.table]
 
         const payload: SocketPayload = {
@@ -139,6 +142,8 @@ export async function initPostgres(){
 
         publishWithAuthCheck(authRouting, payload)
     });
+    
+    PgClient = connection;
 }
 
 export async function initMysql(){
@@ -407,8 +412,22 @@ export async function queryDatabaseAsync(query: string, values: any[]): Promise<
         }) as unknown as Promise<any[]>
     }
     if(PgClient){
-        return PgClient.query(query, values) as unknown as Promise<any[]>
+        // Replace all ? with $1 $2 $3...
+        let index = 0;
+        query = query.replace(/\?/g, () => `$${++index}`)
+
+        const result = await PgClient
+            .query(query, values)
+            .catch((error) => {
+                console.log(colors.red("[DB ERROR]") + ':', error)
+                return {
+                    rows: []
+                }
+            })
+
+        return result.rows
     }
+    console.log(colors.red("[DB ERROR]") + ': No database connection found, returning empty query')
     return Promise.resolve([])
 }
 
