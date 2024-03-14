@@ -30,7 +30,10 @@ export function publish(userId: string, payload: SocketPayload){
 
     if(!connections){
         console.log(`No connections found for user ${userId}, skipping publish event...`);
-        return;
+        return {
+            id,
+            sentTo: [],
+        };
     }
 
     const payloadWithId = {
@@ -38,15 +41,24 @@ export function publish(userId: string, payload: SocketPayload){
         data: filterColumns(payload.table, payload.data),
         id,
     }
-    connections.forEach(connection => {
+
+    console.log(`Published payload`, payloadWithId);
+    console.log(`Found ${connections.length} socket connections for user "${userId}", publishing payload ("${id}") to each:`)
+    connections.forEach((connection, index) => {
         try {
             connection.socket.emit(payload.table, payloadWithId);
             connection.socket.emit('changes', payloadWithId);
+            console.log(`  ${index + 1} >> Sent over connection with session id: ${connection.id}`)
         } catch (error) {
-            console.log(`Failed to publish payload to user ${userId} on connection ${connection.id}`, error);
+            console.log(`Failed to publish payload to user "${userId}" on connection ${connection.id}`, error);
         }
-        console.log(`Published payload`, payloadWithId);
     });
+    console.log('')
+
+    return {
+        id,
+        sentTo: connections.map(c => c.id),
+    };
 }
 
 async function verifyAuthToken(authToken: string){
@@ -106,7 +118,7 @@ export function initSocketio(io: Server){
             connectedUsers[user.id] = [];
         }
         connectedUsers[user.id].push(connection);
-        console.log(`User ${user.name || user.email || user.username || ""} (id: ${user.id || authToken}) connected, session id: ${sessionId}.`);
+        console.log(`User ${user.name || user.email || user.username || ""} (id: ${user.id || authToken}) connected, using token (${authToken}), session id: ${sessionId}.`);
 
         // Cleanup on disconnect
         socket.on('disconnect', () => {

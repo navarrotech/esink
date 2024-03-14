@@ -33,9 +33,14 @@
             const api_trigger = document.getElementById('api_trigger');
             const socketio_trigger = document.getElementById('socketio_trigger');
 
-            const socket = io('https://esink.snapshotplay.com/', {
+            // Get the token from the query params
+            const token = new URLSearchParams(window.location.search).get('token') || '1';
+            const host = `http://localhost:3001`
+            console.log({ token, host })
+
+            const socket = io(host, {
                 auth: {
-                    token: '2AC08EC6-CF02-458A-8BD6-2FC451F0B8B7'
+                    token
                 },
                 transports: ['websocket'],
             });
@@ -64,7 +69,7 @@
             });
 
             api_trigger.addEventListener('click', () => {
-                fetch('http://localhost/publish', {
+                fetch(host + '/publish', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -76,7 +81,7 @@
                         },
                         type: 'insert',
                         securityToken: "12345",
-                        userId: "-1",
+                        userId: token,
                         table: "users",
                         
                         // Optional values:
@@ -96,7 +101,7 @@
                     },
                     type: 'insert',
                     securityToken: "12345",
-                    userId: "-1",
+                    userId: token,
                     table: "users",
                     
                     // Optional values:

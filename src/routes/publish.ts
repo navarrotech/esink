@@ -47,7 +47,7 @@ function handler(req: Request, response: Response){
     }
 
     try {
-        publish(
+        const results = publish(
             userId,
             {
                 data,
@@ -64,6 +64,7 @@ function handler(req: Request, response: Response){
             .status(200)
             .send({
                 code: 200,
+                ...results,
                 message: "Message queued for publishing",
             });
 
