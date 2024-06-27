@@ -42,7 +42,7 @@ export function publish(userId: string, payload: SocketPayload){
         id,
     }
 
-    console.log(`Published payload`, payloadWithId);
+    console.log(`Published payload to user "${userId}"`, JSON.stringify(payloadWithId, null, 2));
     console.log(`Found ${connections.length} socket connections for user "${userId}", publishing payload ("${id}") to each:`)
     connections.forEach((connection, index) => {
         try {
@@ -53,7 +53,7 @@ export function publish(userId: string, payload: SocketPayload){
             console.log(`Failed to publish payload to user "${userId}" on connection ${connection.id}`, error);
         }
     });
-    console.log('')
+    console.log('\n')
 
     return {
         id,
